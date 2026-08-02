@@ -16,6 +16,7 @@ import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Database connection
 await connectDB();
 
 // Stripe webhook (must come before express.json())
@@ -31,13 +32,14 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   "http://localhost:5173",
-  process.env.FRONTEND_URL,
+  "https://bookyourshow-production.vercel.app",
+  "https://bookyourshow-production-i516am9gk-mohit-sh7s-projects.vercel.app",
 ];
 
+// CORS configuration
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests without an origin (Postman, mobile apps, etc.)
+    origin: function (origin, callback) {
       if (!origin) {
         return callback(null, true);
       }
@@ -46,10 +48,13 @@ app.use(
         return callback(null, true);
       }
 
+      console.log("Blocked origin:", origin);
+
       return callback(new Error("Not allowed by CORS"));
     },
+
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
