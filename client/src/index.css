@@ -1,0 +1,127 @@
+/* --- Import Futuristic Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Inter:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+
+@theme{
+  /* --- NEON/FUTURISTIC PALETTE --- */
+  --color-primary: #7F00FF; /* Vibrant Purple (Primary Neon) */
+  --color-primary-dull: #5E00C0; /* Darker Purple for pressed/dull state */
+  
+  --color-neon-pink: #F000FF; /* Neon Pink Accent */
+  --color-neon-blue: #00F0FF; /* Neon Blue Accent */
+
+  --color-text-base: #E0E0E0; /* Light grey for body text (readability) */
+  --color-text-muted: #A0A0A0; /* Dimmer text */
+  --color-text-bright: #FFFFFF; /* For headings */
+  
+  /* --- BASE COLORS (Dark Mode) --- */
+  --color-bg-deep: #05020A; /* Deep space black/purple */
+  --color-bg-card: rgba(16, 10, 26, 0.5); /* Glassmorphism base */
+  --color-border-glass: rgba(255, 255, 255, 0.1); /* Glassmorphism border */
+}
+
+*{
+  /* Use 'Inter' for readable UI text, 'Exo 2' for headings/displays */
+  font-family: 'Inter', sans-serif;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-bg-deep); 
+}
+
+body{
+  color: var(--color-text-base);
+  background-color: var(--color-bg-deep); /* Deep Black/Purple background */
+}
+
+/* Helper class for futuristic headings */
+.text-heading-futuristic {
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  color: var(--color-text-bright);
+  text-shadow: 0 0 8px rgba(127, 0, 255, 0.3); /* Subtle purple glow */
+}
+
+/* Helper class for glassmorphism */
+.glass-card {
+  background-color: var(--color-bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border-glass);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(127, 0, 255, 0.5); /* Glow border on hover */
+  box-shadow: 0 0 20px rgba(127, 0, 255, 0.2); /* Glow shadow on hover */
+}
+
+/* Neon Button Style */
+.btn-neon {
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.75rem;
+  color: var(--color-text-bright);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-neon-pink));
+  box-shadow: 0 0 15px rgba(127, 0, 255, 0.5), 0 0 15px rgba(240, 0, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-neon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(127, 0, 255, 0.8), 0 0 25px rgba(240, 0, 255, 0.5);
+  background-size: 200% auto;
+  background-position: right center; /* change the direction of the change here */
+}
+
+.btn-neon-secondary {
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.75rem;
+  color: var(--color-text-bright);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-border-glass);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.btn-neon-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--color-primary);
+  color: var(--color-text-bright);
+  box-shadow: 0 0 15px rgba(127, 0, 255, 0.5);
+}
+
+
+.no-scrollbar{
+  scrollbar-width: none;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee linear infinite;
+}
