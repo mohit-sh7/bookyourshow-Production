@@ -51,6 +51,9 @@ const App = () => {
         <Route path="/movies/:id" element={<MovieDetails />} />
         <Route path="/movies/:id/:date" element={<SeatLayout />} />
         <Route path="/verify/:bookingId" element={<VerifyTicket />} />
+<Route path="/theaters" element={<Theaters />} />
+<Route path="/releases" element={<Releases />} />
+<Route path="/profile" element={<Profile />} />
 
         <Route
           path="/favorite"

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
+import { serve } from "inngest/express";
 
 import connectDB from "./configs/db.js";
 
@@ -12,6 +13,7 @@ import userRouter from "./routes/userRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 
 import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
+import { inngest, functions } from "./inngest/index.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -26,12 +28,12 @@ app.use((req, res, next) => {
 
 // Stripe webhook (must come before express.json())
 app.use(
- "/api/stripe",
+  "/api/stripe",
   express.raw({ type: "application/json" }),
- stripeWebhooks
+  stripeWebhooks
 );
 
-// Normal middleware
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 
@@ -41,21 +43,15 @@ const allowedOrigins = [
   "https://bookyourshow-production-i516am9gk-mohit-sh7s-projects.vercel.app",
 ];
 
-// CORS configuration
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
       console.log("Blocked origin:", origin);
-
-      return callback(new Error("Not allowed by CORS"));
+      callback(new Error("Not allowed by CORS"));
     },
 
     credentials: true,
@@ -64,17 +60,28 @@ app.use(
   })
 );
 
-// Routes
+// Home route
 app.get("/", (req, res) => {
   res.send("Server is live!");
 });
 
- app.use("/api/auth", authRouter);
- app.use("/api/show", showRouter);
- app.use("/api/booking", bookingRouter);
- app.use("/api/admin", adminRouter);
- app.use("/api/user", userRouter);
+// Inngest route
+app.use(
+  "/api/inngest",
+  serve({
+    client: inngest,
+    functions,
+  })
+);
 
+// API routes
+app.use("/api/auth", authRouter);
+app.use("/api/show", showRouter);
+app.use("/api/booking", bookingRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/user", userRouter);
+
+// Error handling
 process.on("uncaughtException", (err) => {
   console.error("UNCAUGHT EXCEPTION");
   console.error(err);
@@ -87,6 +94,7 @@ process.on("unhandledRejection", (err) => {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
+
   res.status(500).json({
     success: false,
     message: err.message,
@@ -96,4 +104,3 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
-

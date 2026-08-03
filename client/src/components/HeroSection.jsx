@@ -112,7 +112,7 @@ const HeroSection = () => {
 {/* Explore button: pinned to the right edge of the hero */}
 <div className="absolute right-6 md:right-16 bottom-28 md:bottom-28 z-10">
   <button
-    onClick={() => navigate(`/movies/${current._id}`)}
+    onClick={() => navigate(`/movies`)}
     className="btn-neon group flex items-center gap-2 px-4 py-2 text-sm rounded-full transition-all hover:scale-[1.05]"
   >
     Explore Movie
