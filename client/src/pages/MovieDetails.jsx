@@ -15,7 +15,7 @@ const MovieDetails = () => {
   const {id} = useParams()
   const [show, setShow] = useState(null)
 
-  const {shows, axios, getToken, user, fetchFavoriteMovies, favoriteMovies, image_base_url} = useAppContext()
+  const {shows, axios,  user, fetchFavoriteMovies, favoriteMovies, image_base_url} = useAppContext()
 
   const getShow = async ()=>{
     try {
@@ -32,7 +32,13 @@ const MovieDetails = () => {
     try {
       if(!user) return toast.error("Please login to proceed");
 
-      const { data } = await axios.post('/api/user/update-favorite', {movieId: id}, {headers: { Authorization: `Bearer ${await getToken()}` }})
+      const { data } = await axios.post(
+  "/api/user/update-favorite",
+  { movieId: id },
+  {
+    withCredentials: true,
+  }
+);
 
       if(data.success){
         await fetchFavoriteMovies()

@@ -40,6 +40,12 @@ otpExpiry: {
     type: Date,
     default: null,
 },
+favorites: [
+  {
+    type: String,
+    ref: "Movie",
+  },
+],
   },
   { timestamps: true }
 );

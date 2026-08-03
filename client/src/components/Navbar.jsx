@@ -8,6 +8,7 @@ import {
   XIcon,
   Settings,
   LogOut,
+   Heart,
 } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 
@@ -164,7 +165,7 @@ const Navbar = () => {
                   <button
   onClick={() => navigate("/favorite")}
   className="flex w-full items-center gap-3 py-4 hover:text-primary"
->
+><Heart size={18} />
    Favorites
 </button>
 

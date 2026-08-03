@@ -28,15 +28,47 @@ export const getUserBookings = async (req, res) => {
   }
 };
 
-// Temporarily disable favorites
+import User from "../models/User.js";
+
 export const updateFavorite = async (req, res) => {
   try {
-    res.json({
+    const userId = req.user.id;
+    const { movieId } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const exists = user.favorites.includes(movieId);
+
+    if (exists) {
+      user.favorites = user.favorites.filter(
+        (id) => id.toString() !== movieId
+      );
+
+      await user.save();
+
+      return res.json({
+        success: true,
+        message: "Removed from favorites.",
+      });
+    }
+
+    user.favorites.push(movieId);
+
+    await user.save();
+
+    return res.json({
       success: true,
-      message: "Favorites are temporarily disabled.",
+      message: "Added to favorites.",
     });
   } catch (error) {
-    res.json({
+    return res.json({
       success: false,
       message: error.message,
     });
@@ -45,12 +77,18 @@ export const updateFavorite = async (req, res) => {
 
 export const getFavorites = async (req, res) => {
   try {
-    res.json({
+    const user = await User.findById(req.user.id);
+
+    const movies = await Movie.find({
+      _id: { $in: user.favorites },
+    });
+
+    return res.json({
       success: true,
-      movies: [],
+      movies,
     });
   } catch (error) {
-    res.json({
+    return res.json({
       success: false,
       message: error.message,
     });
