@@ -3,21 +3,21 @@ import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 
-import connectDB from "./configs/db.js";
+//import connectDB from "./configs/db.js";
 
-import showRouter from "./routes/showRoutes.js";
-import bookingRouter from "./routes/bookingRoutes.js";
-import adminRouter from "./routes/adminRoutes.js";
-import userRouter from "./routes/userRoutes.js";
-import authRouter from "./routes/authRoutes.js";
+//import showRouter from "./routes/showRoutes.js";
+//import bookingRouter from "./routes/bookingRoutes.js";
+//import adminRouter from "./routes/adminRoutes.js";
+//import userRouter from "./routes/userRoutes.js";
+//import authRouter from "./routes/authRoutes.js";
 
-import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
+//import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Database connection
-await connectDB();
+//await connectDB();
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
@@ -25,11 +25,11 @@ app.use((req, res, next) => {
 });
 
 // Stripe webhook (must come before express.json())
-app.use(
-  "/api/stripe",
-  express.raw({ type: "application/json" }),
-  stripeWebhooks
-);
+//app.use(
+// "/api/stripe",
+//  express.raw({ type: "application/json" }),
+// stripeWebhooks
+//);
 
 // Normal middleware
 app.use(express.json());
