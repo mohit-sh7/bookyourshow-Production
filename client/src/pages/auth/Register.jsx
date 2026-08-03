@@ -94,7 +94,8 @@ const Register = () => {
             { withCredentials: true }
         );
 
-        window.location.href = "/";
+        await loadUser();
+navigate("/");
     } catch (error) {
         console.log(error);
         if (error?.code !== "auth/popup-closed-by-user") {
