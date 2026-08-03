@@ -1,18 +1,26 @@
-import resend from "./resend.js";
+import apiInstance from "./brevo.js";
 
 const sendEmail = async ({ to, subject, body }) => {
   try {
-    console.log("sendEmail() called");
-    console.log("Recipient:", to);
-
-    const response = await resend.emails.send({
-      from: "BookYourShow <onboarding@resend.dev>",
-      to,
+    const sendSmtpEmail = {
+      sender: {
+        name: "BookYourShow",
+        email: process.env.SENDER_EMAIL,
+      },
+      to: [
+        {
+          email: to,
+        },
+      ],
       subject,
-      html: body,
-    });
+      htmlContent: body,
+    };
 
-    console.log("Resend response:", response);
+    const response = await apiInstance.sendTransacEmail(
+      sendSmtpEmail
+    );
+
+    console.log(response);
 
     return response;
   } catch (error) {
