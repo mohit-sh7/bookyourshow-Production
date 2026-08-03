@@ -23,57 +23,84 @@ export const sendBookingMail = async (bookingId) => {
 
     const movie = show.movie;
 
+    const posterUrl = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+
     await sendEmail({
-  to: user.email,
-  subject: `Booking confirmed - ${movie.title}`,
-  body: `
-    <div style="font-family:Arial,sans-serif;padding:20px;">
+      to: user.email,
+      subject: `Booking confirmed - ${movie.title}`,
+      body: `
+      <div style="background:#0f172a;padding:40px;font-family:Arial,sans-serif;color:white;">
 
-      <h1>Your booking is confirmed 🎉</h1>
+        <div style="
+            max-width:650px;
+            margin:auto;
+            background:#111827;
+            border-radius:20px;
+            overflow:hidden;
+            border:1px solid #374151;
+        ">
 
-      <h2>${movie.title}</h2>
+            <img
+                src="${posterUrl}"
+                alt="${movie.title}"
+                style="
+                    width:100%;
+                    height:280px;
+                    object-fit:cover;
+                "
+            />
 
-      <img
-        src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
-        alt="${movie.title}"
-        style="width:220px;border-radius:10px;"
-      />
+            <div style="padding:25px;">
 
-      <hr />
+                <h1>${movie.title}</h1>
 
-      <p><strong>Booking ID:</strong> ${booking._id}</p>
+                <p style="color:#9ca3af;">
+                    Your booking has been confirmed 🎉
+                </p>
 
-      <p><strong>Seats:</strong>
-      ${booking.bookedSeats.join(", ")}</p>
+                <hr />
 
-      <p><strong>Total amount:</strong>
-      ₹${booking.amount}</p>
+                <p><b>Booking ID:</b> ${booking._id}</p>
 
-      <p><strong>Language:</strong>
-      ${movie.original_language}</p>
+                <p><b>Seats:</b> ${booking.bookedSeats.join(", ")}</p>
 
-      <p><strong>Runtime:</strong>
-      ${movie.runtime} minutes</p>
+                <p><b>Amount:</b> ₹${booking.amount}</p>
 
-      <hr />
+                <p><b>Language:</b> ${movie.original_language}</p>
 
-      <h3>Your QR code</h3>
+                <p><b>Duration:</b> ${movie.runtime} min</p>
 
-      <img
-        src="${booking.qrCode}"
-        alt="QR code"
-        style="width:250px;"
-      />
+                <hr />
 
-      <p>Please show this QR code at the entrance.</p>
+                <div style="text-align:center;">
 
-    </div>
-  `,
-});
+                    <h2>Your Ticket QR Code</h2>
+
+                    <img
+                        src="${booking.qrCode}"
+                        alt="QR Code"
+                        style="
+                            width:220px;
+                            border-radius:12px;
+                        "
+                    />
+
+                    <p style="margin-top:15px;">
+                        Please show this QR code at the entrance.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+      </div>
+      `,
+    });
 
     console.log("Booking confirmation email sent.");
   } catch (error) {
     console.error("Email error:", error);
   }
-    
 };

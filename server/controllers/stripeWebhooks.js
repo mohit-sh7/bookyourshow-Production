@@ -64,9 +64,13 @@ export const stripeWebhooks = async (req, res) => {
 
         const verifyUrl = `${process.env.FRONTEND_URL}/verify/${booking._id}`;
 
-        const qrCode = await QRCode.toDataURL(verifyUrl);
+       const qrCode = await QRCode.toDataURL(verifyUrl);
 
-        booking.qrCode = qrCode;
+const uploaded = await cloudinary.uploader.upload(qrCode, {
+    folder: "bookyourshow/qr",
+});
+
+booking.qrCode = uploaded.secure_url;
         booking.isPaid = true;
         booking.paymentLink = "";
 
