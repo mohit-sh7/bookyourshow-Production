@@ -69,11 +69,11 @@ app.get("/", (req, res) => {
   res.send("Server is live!");
 });
 
-app.use("/api/auth", authRouter);
-app.use("/api/show", showRouter);
-app.use("/api/booking", bookingRouter);
-app.use("/api/admin", adminRouter);
-app.use("/api/user", userRouter);
+// app.use("/api/auth", authRouter);
+// app.use("/api/show", showRouter);
+// app.use("/api/booking", bookingRouter);
+// app.use("/api/admin", adminRouter);
+// app.use("/api/user", userRouter);
 
 process.on("uncaughtException", (err) => {
   console.error("UNCAUGHT EXCEPTION");
