@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { adminAuth } from "../configs/firebaseAdmin.js";
+import generateOTP from "../utils/generateOTP.js";
+import sendOTP from "../configs/sendOTP.js";
 
 // Register
 export const registerUser = async (req, res) => {
@@ -17,17 +19,25 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    await User.create({
+    const otp = generateOTP();
+
+    const user = await User.create({
       name,
       email,
-      password: hashed,
+      password: hashedPassword,
+      emailVerified: false,
+      otp,
+      otpExpiry: Date.now() + 10 * 60 * 1000,
     });
+
+    await sendOTP(user.email, otp);
 
     return res.json({
       success: true,
-      message: "Registered successfully",
+      verificationRequired: true,
+      message: "OTP sent successfully.",
     });
   } catch (err) {
     console.error(err);
@@ -50,6 +60,13 @@ export const loginUser = async (req, res) => {
       return res.json({
         success: false,
         message: "User not found",
+      });
+    }
+
+    if (!user.emailVerified) {
+      return res.json({
+        success: false,
+        message: "Please verify your email first.",
       });
     }
 
@@ -100,8 +117,6 @@ export const googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
 
-    console.log("Google token received");
-
     const decoded = await adminAuth.verifyIdToken(token);
 
     const email = decoded.email;
@@ -113,6 +128,7 @@ export const googleLogin = async (req, res) => {
       user = await User.create({
         name,
         email,
+        emailVerified: true,
       });
     }
 

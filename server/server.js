@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
-import { serve } from "inngest/express";
+
 
 import connectDB from "./configs/db.js";
 
@@ -13,7 +13,7 @@ import userRouter from "./routes/userRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 
 import { stripeWebhooks } from "./controllers/stripeWebhooks.js";
-import { inngest, functions } from "./inngest/index.js";
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -65,14 +65,7 @@ app.get("/", (req, res) => {
   res.send("Server is live!");
 });
 
-// Inngest route
-app.use(
-  "/api/inngest",
-  serve({
-    client: inngest,
-    functions,
-  })
-);
+
 
 // API routes
 app.use("/api/auth", authRouter);

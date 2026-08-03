@@ -80,6 +80,8 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [otp, setOtp] = useState("");
 
   const handleGoogleSignup = async () => {
     setGoogleLoading(true);
@@ -97,37 +99,62 @@ const Register = () => {
         await loadUser();
 navigate("/");
     } catch (error) {
-        console.log(error);
-        if (error?.code !== "auth/popup-closed-by-user") {
-          toast.error("Google sign-up failed. Please try again.");
-        }
-        setGoogleLoading(false);
+    console.log(error);
+
+    if (error?.code !== "auth/popup-closed-by-user") {
+        toast.error("Google sign-up failed. Please try again.");
     }
-  };
+} finally {
+    setGoogleLoading(false);
+}
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+ const onSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const { data } = await axios.post(
-        `${BASE_URL}/api/auth/register`,
-        form,
-        { withCredentials: true }
-      );
+  try {
+    const { data } = await axios.post(
+      `${BASE_URL}/api/auth/register`,
+      form,
+      { withCredentials: true }
+    );
 
-      if (!data.success) {
-        toast.error(data.message || "Registration failed");
-      } else {
-        toast.success("Registration successful! Please login.");
-        navigate("/login");
+    if (!data.success) {
+      toast.error(data.message || "Registration failed");
+    } else {
+      toast.success("OTP sent successfully.");
+      setShowOTP(true);
+    }
+  } catch (err) {
+    toast.error("Unable to register.");
+  }
+
+  setLoading(false);
+};
+
+const verifyOtp = async () => {
+  try {
+    const { data } = await axios.post(
+      `${BASE_URL}/api/auth/verify-otp`,
+      {
+        email: form.email,
+        otp,
+      },
+      {
+        withCredentials: true,
       }
-    } catch (err) {
-      toast.error("Unable to register. Check your connection and try again.");
-    }
+    );
 
-    setLoading(false);
-  };
+    if (data.success) {
+      toast.success("Email verified successfully.");
+      navigate("/login");
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    toast.error("Verification failed.");
+  }
+};
 
   const isBusy = loading || googleLoading;
 
@@ -155,85 +182,122 @@ navigate("/");
           <div className="h-px flex-1 bg-white/15" />
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="text-sm text-white/80">Full Name</label>
-            <div className="relative mt-1">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-              <input
-                id="name"
-                type="text"
-                required
-                autoComplete="name"
-                placeholder="John Doe"
-                className="w-full pl-10 pr-3 p-3 rounded-lg bg-white/5 border border-white/20 outline-none text-white focus:border-primary transition"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </div>
-          </div>
+        {!showOTP ? (
+  <form onSubmit={onSubmit} className="space-y-4">
+    {/* Name */}
+    <div>
+      <label htmlFor="name" className="text-sm text-white/80">
+        Full Name
+      </label>
 
-          <div>
-            <label htmlFor="email" className="text-sm text-white/80">Email</label>
-            <div className="relative mt-1">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-              <input
-                id="email"
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="you@example.com"
-                className="w-full pl-10 pr-3 p-3 rounded-lg bg-white/5 border border-white/20 outline-none text-white focus:border-primary transition"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-            </div>
-          </div>
+      <div className="relative mt-1">
+        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
 
-          <div>
-            <label htmlFor="password" className="text-sm text-white/80">Password</label>
-            <div className="relative mt-1">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                required
-                minLength={6}
-                autoComplete="new-password"
-                placeholder="••••••••"
-                className="w-full pl-10 pr-10 p-3 rounded-lg bg-white/5 border border-white/20 outline-none text-white focus:border-primary transition"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition cursor-pointer"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
+        <input
+          id="name"
+          type="text"
+          required
+          value={form.name}
+          onChange={(e) =>
+            setForm({ ...form, name: e.target.value })
+          }
+          className="w-full pl-10 pr-3 p-3 rounded-lg bg-white/5 border border-white/20 text-white"
+        />
+      </div>
+    </div>
 
-          <button
-            type="submit"
-            disabled={isBusy}
-            className="w-full bg-primary hover:bg-primary-dull text-white py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {loading ? "Creating account..." : "Register"}
-          </button>
-        </form>
+    {/* Email */}
+    <div>
+      <label htmlFor="email" className="text-sm text-white/80">
+        Email
+      </label>
 
-        <p className="text-center mt-6 text-gray-300 text-sm">
-          Already have an account?{" "}
-          <span
-            className="text-primary cursor-pointer hover:underline"
-            onClick={() => navigate("/login")}
-          >
-            Login
-          </span>
-        </p>
+      <div className="relative mt-1">
+        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+
+        <input
+          id="email"
+          type="email"
+          required
+          value={form.email}
+          onChange={(e) =>
+            setForm({ ...form, email: e.target.value })
+          }
+          className="w-full pl-10 pr-3 p-3 rounded-lg bg-white/5 border border-white/20 text-white"
+        />
+      </div>
+    </div>
+
+    {/* Password */}
+    <div>
+      <label htmlFor="password" className="text-sm text-white/80">
+        Password
+      </label>
+
+      <div className="relative mt-1">
+        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+
+        <input
+          id="password"
+          type={showPassword ? "text" : "password"}
+          required
+          value={form.password}
+          onChange={(e) =>
+            setForm({ ...form, password: e.target.value })
+          }
+          className="w-full pl-10 pr-10 p-3 rounded-lg bg-white/5 border border-white/20 text-white"
+        />
+
+        <button
+          type="button"
+          onClick={() => setShowPassword((prev) => !prev)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40"
+          aria-label={showPassword ? "Hide password" : "Show password"}
+        >
+          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      className="w-full bg-primary py-3 rounded-lg text-white"
+    >
+      Register
+    </button>
+  </form>
+) : (
+  <div className="space-y-4">
+    <label className="text-sm text-white">
+      Enter the OTP sent to your email
+    </label>
+
+    <input
+      type="text"
+      maxLength={6}
+      value={otp}
+      onChange={(e) => setOtp(e.target.value)}
+      className="w-full p-3 rounded-lg bg-white/5 border border-white/20 text-white"
+      placeholder="123456"
+    />
+
+    <button
+      onClick={verifyOtp}
+      className="w-full bg-primary py-3 rounded-lg text-white"
+    >
+      Verify OTP
+    </button>
+  </div>
+)}
+<p className="text-center mt-6 text-gray-300 text-sm">
+  Already have an account?{" "}
+  <span
+    className="text-primary cursor-pointer hover:underline"
+    onClick={() => navigate("/login")}
+  >
+    Login
+  </span>
+</p>
       </div>
     </div>
   );

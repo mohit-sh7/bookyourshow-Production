@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import Booking from "../models/Booking.js";
-import { inngest } from "../inngest/index.js";
 import QRCode from "qrcode";
+import { sendBookingMail } from "../configs/sendBookingMail.js";
 
 const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -75,18 +75,10 @@ export const stripeWebhooks = async (req, res) => {
         console.log("Booking updated successfully.");
 
         try {
-          await inngest.send({
-            name: "app/show.booked",
-            data: {
-              bookingId,
-            },
-          });
-
-          console.log("Email event sent.");
-        } catch (error) {
-          console.error("Inngest error:", error);
-        }
-
+  await sendBookingMail(bookingId);
+} catch (error) {
+  console.error(error);
+}
         break;
       }
 
