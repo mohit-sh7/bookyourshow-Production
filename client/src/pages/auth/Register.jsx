@@ -107,8 +107,9 @@ navigate("/");
 } finally {
     setGoogleLoading(false);
 }
+}; // ← add this line
 
- const onSubmit = async (e) => {
+const onSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
 
