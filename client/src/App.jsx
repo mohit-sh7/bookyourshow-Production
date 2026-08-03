@@ -35,7 +35,8 @@ const App = () => {
   const hideNavbar =
     location.pathname.startsWith("/admin") ||
     location.pathname === "/login" ||
-    location.pathname === "/register";
+    location.pathname === "/register" ||
+    location.pathname.startsWith("/verify");
 
   const { user, loading } = useAppContext();
 
