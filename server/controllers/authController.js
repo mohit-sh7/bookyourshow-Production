@@ -124,14 +124,19 @@ export const googleLogin = async (req, res) => {
 
     let user = await User.findOne({ email });
 
-    if (!user) {
-      user = await User.create({
-        name,
-        email,
-        emailVerified: true,
-      });
-    }
+   if (!user) {
+  const hashedPassword = await bcrypt.hash(
+    Math.random().toString(36),
+    10
+  );
 
+  user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+    emailVerified: true,
+  });
+}
     const jwtToken = jwt.sign(
       {
         id: user._id,
