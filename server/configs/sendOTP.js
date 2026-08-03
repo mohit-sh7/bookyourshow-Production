@@ -1,4 +1,4 @@
-import sendEmail from "./nodeMailer.js";
+import sendEmail from "./sendEmail.js";
 
 const sendOTP = async (email, otp) => {
     await sendEmail({
