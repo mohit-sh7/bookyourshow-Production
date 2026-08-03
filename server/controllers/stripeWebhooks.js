@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import Booking from "../models/Booking.js";
 import QRCode from "qrcode";
 import { sendBookingMail } from "../configs/sendBookingMail.js";
+import cloudinary from "../configs/cloudinary.js";
 
 const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
