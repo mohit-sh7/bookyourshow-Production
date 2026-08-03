@@ -5,6 +5,11 @@ import sendEmail from "./sendEmail.js";
 
 export const sendBookingMail = async (bookingId) => {
   try {
+    console.log("Booking mail function called");
+
+export const sendBookingMail = async (bookingId) => {
+
+};
     const booking = await Booking.findById(bookingId);
 
     if (!booking) {
@@ -73,4 +78,5 @@ export const sendBookingMail = async (bookingId) => {
   } catch (error) {
     console.error("Email error:", error);
   }
+    
 };

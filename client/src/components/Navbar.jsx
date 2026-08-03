@@ -14,12 +14,13 @@ import { useAppContext } from "../context/AppContext";
 
 const NAV_ITEMS = ["Home", "Movies", "Theaters", "Releases"];
 const SCROLL_THRESHOLD = 40;
+const EASE = "cubic-bezier(0.4, 0, 0.2, 1)"; // smooth, no overshoot
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [desktopHovered, setDesktopHovered] = useState(false); // desktop: cursor near the pill
-  const [desktopPinned, setDesktopPinned] = useState(false); // fallback tap-to-expand on desktop touch trackpads
-  const [mobileNavOpen, setMobileNavOpen] = useState(false); // mobile: dropdown panel toggle
+  const [desktopHovered, setDesktopHovered] = useState(false);
+  const [desktopPinned, setDesktopPinned] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const pinnedRef = useRef(false);
@@ -30,8 +31,7 @@ const Navbar = () => {
 
   const { user, favoriteMovies, logoutUser } = useAppContext();
 
-  // Whole top bar shrinks on scroll unless something is actively holding it open
-  const isBarCompact = scrolled && !desktopHovered && !desktopPinned && !mobileNavOpen;
+  // Only the pill reacts to scroll — logo and profile never move or resize
   const isPillCompact = scrolled && !desktopHovered && !desktopPinned;
 
   useEffect(() => {
@@ -75,84 +75,85 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 z-50 flex w-full justify-center">
       <div className="mt-4 flex w-[95%] max-w-6xl flex-col">
-        {/* Top bar — logo, desktop pill, profile/menu — always one row, never overlaps */}
-        <div
-          className={`
-            flex items-center justify-between
-            transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
-            ${isBarCompact ? "h-12 px-4" : "h-16 md:h-20 px-4 md:px-6"}
-          `}
-        >
-          {/* Logo */}
+        {/* Top bar — logo and profile are fixed, never animate */}
+        <div className="flex items-center justify-between h-16 md:h-20 px-4 md:px-6">
           <Link to="/" className="z-10 flex-shrink-0">
-            <img
-              src={assets.logo}
-              alt="logo"
-              className={`transition-all duration-500 ${
-                isBarCompact ? "w-8" : "w-28 md:w-36"
-              }`}
-            />
+            <img src={assets.logo} alt="logo" className="w-28 md:w-36" />
           </Link>
 
-          {/* Desktop-only hover pill — nav links + search */}
+          {/* Desktop-only hover pill — the only thing that morphs */}
           <div
             ref={desktopPillRef}
             onMouseEnter={() => setDesktopHovered(true)}
             onMouseLeave={() => setDesktopHovered(false)}
             onClick={() => isPillCompact && setDesktopPinned(true)}
+            style={{ transition: `width 400ms ${EASE}, height 400ms ${EASE}` }}
             className={`
-              hidden md:flex items-center overflow-hidden
+              hidden md:flex relative items-center justify-center overflow-hidden
               rounded-full border border-white/10 bg-black/70 backdrop-blur-xl
               shadow-[0_0_25px_rgba(127,0,255,0.25)]
-              transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
-              ${isPillCompact ? "cursor-pointer w-11 h-11 justify-center" : "px-6 h-14 gap-8 justify-center"}
+              ${isPillCompact ? "cursor-pointer w-11 h-11" : "w-[560px] h-14"}
             `}
           >
-            {isPillCompact ? (
+            {/* Compact layer: search icon */}
+            <div
+              style={{ transition: `opacity 250ms ${EASE}, transform 300ms ${EASE}` }}
+              className={`
+                absolute inset-0 flex items-center justify-center
+                ${isPillCompact ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"}
+              `}
+            >
               <SearchIcon className="h-5 w-5 text-gray-300" />
-            ) : (
-              <>
-                <nav className="flex items-center gap-6 flex-shrink-0">
-                  {NAV_ITEMS.map((item) => (
-                    <Link
-                      key={item}
-                      to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
-                      onClick={stop}
-                      className="group relative whitespace-nowrap text-sm font-medium text-gray-300 transition hover:text-white"
-                    >
-                      {item}
-                      <span className="absolute left-0 -bottom-1 h-[2px] w-0 rounded-full bg-primary transition-all duration-300 group-hover:w-full" />
-                    </Link>
-                  ))}
-                  {favoriteMovies.length > 0 && (
-                    <Link
-                      to="/favorite"
-                      onClick={stop}
-                      className="whitespace-nowrap text-sm text-gray-300 transition hover:text-white"
-                    >
-                      Favorites
-                    </Link>
-                  )}
-                </nav>
+            </div>
 
-                <form
-                  onSubmit={handleSearchSubmit}
-                  onClick={stop}
-                  className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 flex-shrink-0"
-                >
-                  <SearchIcon className="h-4 w-4 text-gray-300 flex-shrink-0" />
-                  <input
-                    name="search"
-                    type="text"
-                    placeholder="Search"
-                    className="w-24 bg-transparent text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none"
-                  />
-                </form>
-              </>
-            )}
+            {/* Expanded layer: nav + search, crossfades in */}
+            <div
+              style={{ transition: `opacity 300ms ${EASE} 80ms, transform 350ms ${EASE} 80ms` }}
+              className={`
+                flex items-center justify-center gap-8 px-6 w-full
+                ${isPillCompact ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"}
+              `}
+            >
+              <nav className="flex items-center gap-6 flex-shrink-0">
+                {NAV_ITEMS.map((item) => (
+                  <Link
+                    key={item}
+                    to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                    onClick={stop}
+                    className="group relative whitespace-nowrap text-sm font-medium text-gray-300 transition hover:text-white"
+                  >
+                    {item}
+                    <span className="absolute left-0 -bottom-1 h-[2px] w-0 rounded-full bg-primary transition-all duration-300 group-hover:w-full" />
+                  </Link>
+                ))}
+                {favoriteMovies.length > 0 && (
+                  <Link
+                    to="/favorite"
+                    onClick={stop}
+                    className="whitespace-nowrap text-sm text-gray-300 transition hover:text-white"
+                  >
+                    Favorites
+                  </Link>
+                )}
+              </nav>
+
+              <form
+                onSubmit={handleSearchSubmit}
+                onClick={stop}
+                className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 flex-shrink-0"
+              >
+                <SearchIcon className="h-4 w-4 text-gray-300 flex-shrink-0" />
+                <input
+                  name="search"
+                  type="text"
+                  placeholder="Search"
+                  className="w-24 bg-transparent text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none"
+                />
+              </form>
+            </div>
           </div>
 
-          {/* Right section — profile/login always visible; menu toggle only on mobile */}
+          {/* Right section — fixed, no scroll-based sizing */}
           <div className="z-10 flex flex-shrink-0 items-center gap-2 md:gap-3">
             {!user ? (
               <button
@@ -165,15 +166,13 @@ const Navbar = () => {
               <div className="relative" ref={profileMenuRef}>
                 <button
                   onClick={() => setShowProfileMenu((prev) => !prev)}
-                  className={`flex items-center justify-center rounded-full bg-primary font-semibold transition-all duration-500 ${
-                    isBarCompact ? "h-8 w-8 text-sm" : "h-9 w-9 md:h-11 md:w-11 text-base md:text-lg"
-                  }`}
+                  className="flex h-9 w-9 md:h-11 md:w-11 items-center justify-center rounded-full bg-primary text-base md:text-lg font-semibold"
                 >
                   {user?.name?.charAt(0)?.toUpperCase() || "U"}
                 </button>
 
                 {showProfileMenu && (
-                  <div className="absolute right-0 top-11 md:top-14 w-64 md:w-72 rounded-2xl border border-white/10 bg-black/90 p-4 backdrop-blur-xl">
+                  <div className="absolute right-0 top-12 md:top-14 w-64 md:w-72 rounded-2xl border border-white/10 bg-black/90 p-4 backdrop-blur-xl">
                     <div className="border-b border-white/10 pb-4">
                       <p className="font-semibold">{user?.name}</p>
                       <p className="mt-1 text-sm text-gray-400">{user?.email}</p>
@@ -226,11 +225,12 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile dropdown panel — drops below the top bar, never overlaps it */}
+        {/* Mobile dropdown panel */}
         <div
           ref={mobileNavRef}
+          style={{ transition: `max-height 350ms ${EASE}, opacity 300ms ${EASE}` }}
           className={`
-            md:hidden overflow-hidden transition-all duration-300 ease-out
+            md:hidden overflow-hidden
             ${mobileNavOpen ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0"}
           `}
           onClick={stop}

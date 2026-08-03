@@ -1,14 +1,23 @@
 import resend from "./resend.js";
 
 const sendEmail = async ({ to, subject, body }) => {
-  const response = await resend.emails.send({
-    from: "BookYourShow <mohitallfamily1@gmail.com>",
-    to,
-    subject,
-    html: body,
-  });
+  try {
+    console.log("sendEmail() called");
+    console.log("Recipient:", to);
 
-  return response;
+    const response = await resend.emails.send({
+      from: "BookYourShow <onboarding@resend.dev>",
+      to,
+      subject,
+      html: body,
+    });
+
+    console.log("Resend response:", response);
+
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export default sendEmail;
