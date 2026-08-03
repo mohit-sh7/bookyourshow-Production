@@ -161,6 +161,12 @@ const Navbar = () => {
                     <TicketPlus size={18} />
                     My Bookings
                   </button>
+                  <button
+  onClick={() => navigate("/favorite")}
+  className="flex w-full items-center gap-3 py-4 hover:text-primary"
+>
+   Favorites
+</button>
 
                   <button
                     onClick={() => navigate("/profile")}

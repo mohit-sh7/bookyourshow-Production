@@ -11,6 +11,7 @@ import SeatLayout from "./pages/SeatLayout";
 import MyBookings from "./pages/MyBookings";
 import Favorite from "./pages/Favorite";
 import VerifyTicket from "./pages/VerifyTicket";
+import Theaters from "./pages/Theaters";
 
 import Layout from "./pages/admin/Layout";
 import Dashboard from "./pages/admin/Dashboard";
