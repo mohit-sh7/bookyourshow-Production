@@ -20,6 +20,8 @@ import ListBookings from "./pages/admin/ListBookings";
 
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import Releases from "./pages/Releases";
+import Profile from "./pages/auth/Profile";
 
 import Footer from "./components/Footer";
 import { Toaster } from "react-hot-toast";
