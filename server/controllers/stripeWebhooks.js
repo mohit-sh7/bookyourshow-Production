@@ -1,59 +1,108 @@
-import stripe from "stripe";
-import Booking from '../models/Booking.js'
+import Stripe from "stripe";
+import Booking from "../models/Booking.js";
 import { inngest } from "../inngest/index.js";
 import QRCode from "qrcode";
 
-export const stripeWebhooks = async (request, response)=>{
-    console.log("Stripe webhook endpoint reached");
-    const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
-    const sig = request.headers["stripe-signature"];
+const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-    let event;
+export const stripeWebhooks = async (req, res) => {
+  console.log("Stripe webhook endpoint reached");
 
-    try {
-        event = stripeInstance.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
-    } catch (error) {
-        return response.status(400).send(`Webhook Error: ${error.message}`);
-    }
+  const signature = req.headers["stripe-signature"];
 
-    try {
-        switch (event.type) {
-    case "checkout.session.completed": {
+  let event;
+
+  try {
+    event = stripeInstance.webhooks.constructEvent(
+      req.body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (error) {
+    console.error("Webhook signature verification failed:", error.message);
+
+    return res.status(400).send(`Webhook Error: ${error.message}`);
+  }
+
+  try {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        console.log("Payment completed.");
+
         const session = event.data.object;
 
-     const { bookingId } = session.metadata;
+        const bookingId = session.metadata?.bookingId;
 
-const booking = await Booking.findById(bookingId).populate({
-    path: "show",
-    populate: {
-        path: "movie",
-    },
-});
+        console.log("Booking ID:", bookingId);
 
-const verifyUrl = `${process.env.FRONTEND_URL}/verify/${booking._id}`;
-
-const qrCode = await QRCode.toDataURL(verifyUrl);
-
-booking.qrCode = qrCode;
-booking.isPaid = true;
-booking.paymentLink = "";
-
-await booking.save();
-
-await inngest.send({
-    name: "app/show.booked",
-    data: { bookingId },
-});
-
-break;
-            }
-        
-            default:
-                console.log('Unhandled event type:', event.type)
+        if (!bookingId) {
+          return res.status(400).json({
+            success: false,
+            message: "Booking ID not found.",
+          });
         }
-        response.json({received: true})
-    } catch (err) {
-        console.error("Webhook processing error:", err);
-        response.status(500).send("Internal Server Error");
+
+        const booking = await Booking.findById(bookingId);
+
+        if (!booking) {
+          console.log("Booking not found.");
+
+          return res.status(404).json({
+            success: false,
+            message: "Booking not found.",
+          });
+        }
+
+        // Prevent duplicate webhook execution
+        if (booking.isPaid) {
+          console.log("Booking already paid.");
+
+          return res.json({
+            received: true,
+          });
+        }
+
+        const verifyUrl = `${process.env.FRONTEND_URL}/verify/${booking._id}`;
+
+        const qrCode = await QRCode.toDataURL(verifyUrl);
+
+        booking.qrCode = qrCode;
+        booking.isPaid = true;
+        booking.paymentLink = "";
+
+        await booking.save();
+
+        console.log("Booking updated successfully.");
+
+        try {
+          await inngest.send({
+            name: "app/show.booked",
+            data: {
+              bookingId,
+            },
+          });
+
+          console.log("Email event sent.");
+        } catch (error) {
+          console.error("Inngest error:", error);
+        }
+
+        break;
+      }
+
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
     }
-}
+
+    return res.json({
+      received: true,
+    });
+  } catch (error) {
+    console.error("Webhook processing error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
