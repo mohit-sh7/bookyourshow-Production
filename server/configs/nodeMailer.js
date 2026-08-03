@@ -32,5 +32,7 @@ transporter.verify(function (error, success) {
     console.log("SMTP server is ready.");
   }
 });
+console.log("SMTP USER:", process.env.SMTP_USER);
+console.log("SENDER:", process.env.SENDER_EMAIL);
 
 export default sendEmail;
