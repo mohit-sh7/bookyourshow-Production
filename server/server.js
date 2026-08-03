@@ -19,6 +19,11 @@ const port = process.env.PORT || 3000;
 // Database connection
 await connectDB();
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Stripe webhook (must come before express.json())
 app.use(
   "/api/stripe",
@@ -92,7 +97,3 @@ app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
